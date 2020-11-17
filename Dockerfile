@@ -5,6 +5,6 @@ RUN ./mvnw -q clean
 RUN ./mvnw -q package
 ARG JAR_FILE=/target/*.jar
 RUN echo ${JAR_FILE}
-COPY --chown=spring:spring ${JAR_FILE} /app.jar
+RUN chown spring:spring ${JAR_FILE}
 USER spring:spring
-ENTRYPOINT ["java","-jar","/app.jar"]
+ENTRYPOINT ["java","-jar", "${JAR_FILE}"]
