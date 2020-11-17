@@ -1,6 +1,6 @@
 FROM openjdk:13-alpine
 RUN addgroup -S spring && adduser -S spring -G spring
-COPY --chown=spring:spring ./ ./
+COPY ./ ./
 RUN ./mvnw clean
 RUN ./mvnw package
 ARG JAR_FILE=target/*.jar
