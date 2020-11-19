@@ -36,4 +36,13 @@ jobs:
           java-version: 1.8
 
     - name: Build with Maven
-      run: mvn -B clean package docker:build -DpushImage
+      run: mvn -B clean package docker:build
+
+    - name: Tag Image
+      run: |-
+        docker tag gcr.io/$PROJECT_ID/$IMAGE "gcr.io/$PROJECT_ID/$IMAGE:$GITHUB_SHA"
+
+    - name: Publish
+      run: |-
+        docker push "gcr.io/$PROJECT_ID/$IMAGE:$GITHUB_SHA"
+
