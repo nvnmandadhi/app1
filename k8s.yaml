@@ -17,6 +17,9 @@ spec:
       containers:
         - image: gcr.io/solstice-api-junkyard/app1
           name: hello
+          envFrom:
+            - configMapRef:
+                name: env-config
           ports:
             - containerPort: 8080
       serviceAccountName: app1
