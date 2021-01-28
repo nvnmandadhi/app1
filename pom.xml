@@ -49,6 +49,9 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
                     <executable>true</executable>
+                    <image>
+                        <name>app1</name>
+                    </image>
                 </configuration>
             </plugin>
             <plugin>
