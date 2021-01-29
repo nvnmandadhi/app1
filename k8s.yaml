@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: app1
+  namespace: apps
 spec:
   selector:
     matchLabels:
@@ -11,15 +12,66 @@ spec:
       labels:
         app: app1
     spec:
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 1000
+      {{- if .Values.dockercfg}}
+      imagePullSecrets:
+        - name: {{.Values.name}}-dockercfg
+      {{- end}}
       containers:
         - image: gcr.io/solstice-api-junkyard/app1
+          readinessProbe:
+            httpGet:
+              port: 8080
+              path: /
+            timeoutSeconds: 2
           name: hello
           envFrom:
             - configMapRef:
                 name: env-config
           ports:
-            - containerPort: 8080
-      serviceAccountName: app1
+            - name: http
+              containerPort: 8080
+      serviceAccountName: pod-runner
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: env-config
+  namespace: apps
+data:
+  env: prod
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app1-svc
+  annotations:
+    harness.io/managed: true
+  namespace: apps
+spec:
+  type: ClusterIP
+  selector:
+    app: app1
+  ports:
+    - port: 8080
+      name: http
+      targetPort: 8080
+---
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: app1-svc
+  namespace: apps
+  annotations:
+    openshift.io/host.generated: 'true'
+spec:
+  host: app1-svc-apps.apps.ocp.nmandadhi.com
+  to:
+    kind: Service
+    name: app1-svc
+    weight: 100
+  port:
+    targetPort: http
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+  wildcardPolicy: None
